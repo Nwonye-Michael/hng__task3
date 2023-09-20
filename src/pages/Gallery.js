@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react"
 import NavBar from "../components/Navbar"
 
 const Gallery = () => {
+  const [isLoading, setIsLoading] = useState(true)
   const initialImages = [
     {
       id: 238,
@@ -210,6 +211,7 @@ const Gallery = () => {
   let [images, setImages] = useState([])
   useEffect(() => {
     setImages(initialImages.sort((a, b) => a.id - b.id))
+    setIsLoading(false)
   }, [])
   //  set boundary for dragging something tha inst an image
 
@@ -233,9 +235,9 @@ const Gallery = () => {
   const handleTouchStartGallery = (e) => {
     if (e.nodeName === "IMG") {
       setFirstIndex(e.target.getAttribute("i"))
-      // console.log(e.target.getAttribute("src"))
+      console.log(e.target.getAttribute("src"))
       // setImageBeingDaraggedSrc(e.target.getAttribute("src"))
-      // console.log(e)
+      console.log(e)
     }
   }
 
@@ -244,7 +246,7 @@ const Gallery = () => {
       e.changedTouches[0].clientX,
       e.changedTouches[0].clientY
     )
-    // console.log(elementAtPoint.tagName.toUpperCase())
+    console.log(elementAtPoint.tagName.toUpperCase())
     if (elementAtPoint.tagName.toUpperCase() === "IMG") {
       const tempIndex = elementAtPoint.getAttribute("i")
 
@@ -258,7 +260,7 @@ const Gallery = () => {
 
       setImages(updatedImages)
     }
-    // console.log("not dropped on image")
+    console.log("not dropped on image")
   }
 
   const handleElementDrag = (e) => {
@@ -283,20 +285,20 @@ const Gallery = () => {
 
     // Swap the images at oldIndex and newIndex
     const temp = updatedImages[oldIndex]
-    // console.log(temp, updatedImages[newIndex], "things to swap")
+    console.log(temp, updatedImages[newIndex], "things to swap")
     updatedImages[oldIndex] = updatedImages[newIndex]
     // console.log(updatedImages[newIndex])
     updatedImages[newIndex] = temp
     // console.log(updatedImages[newIndex])
 
     setImages(updatedImages)
-    // console.log(images)
+    console.log(images)
   }
 
   const handleWindowTouchMove = (e) => {
     if (!isScrollEnabled) {
       e.preventDefault()
-      // console.log(e)
+      console.log(e)
     }
   }
 
@@ -318,35 +320,46 @@ const Gallery = () => {
   return (
     <div className="gallery flex justify-center relative">
       <NavBar data={images} />
-      <div
-        className="gallery__grid grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 md:gap-y-8 gap-y-4 lg:gap-y-12 relative top-12 max-w-100vw overflow-hidden"
-        onTouchStart={(e) => handleTouchStartGallery(e)}
-        onTouchEnd={(e) => handleTouchEndGallery(e)}
-    
-      >
-        {images.map((image, index) => (
-          <div key={image.id}>
-            <img
-              className="aspect-[500/280]  lg:m-8 flex-1 lg:w-[20vw] md:w-[28vw] md:m-4 w-[40vw] m-4 "
-              src={image?.src}
-              // key={image.id}
-              id={image.id}
-              i={index}
-              ref={imgRef}
-              alt={`img`}
-              draggable="true"
-              onDragStart={(e) => handleDragStart(e, index)}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, index)}
-              // touch drag
-
-              onTouchStart={(e) => handleTouchStart(e, index)}
-              onTouchEnd={(e) => handleTouchEnd(e, index)}
-              onTouchMove={handleElementDrag}
-            />
+      {isLoading ? (
+        <div className="isLoading h-[80vh] w-[100vw] flex justify-center items-center object-fill">
+          <div className="animate-bounce-in-top">
+            <p className="text-base font-semibold text-rose-600">Loading...</p>
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        <div
+          className="gallery__grid grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 md:gap-y-8 gap-y-4 lg:gap-y-12 relative top-12 max-w-100vw overflow-hidden"
+          onTouchStart={(e) => handleTouchStartGallery(e)}
+          onTouchEnd={(e) => handleTouchEndGallery(e)}
+          // style={{
+          //   pointerEvents: isScrollEnabled ? "auto" : "none",
+          //   touchAction: isScrollEnabled ? "auto" : "none",
+          // }}
+        >
+          {images.map((image, index) => (
+            <div key={image.id}>
+              <img
+                className="aspect-[500/280]  lg:m-8 flex-1 lg:w-[20vw] md:w-[28vw] md:m-4 w-[40vw] m-4 "
+                src={image?.src}
+                // key={image.id}
+                id={image.id}
+                i={index}
+                ref={imgRef}
+                alt={`img`}
+                draggable="true"
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, index)}
+                // touch drag
+
+                onTouchStart={(e) => handleTouchStart(e, index)}
+                onTouchEnd={(e) => handleTouchEnd(e, index)}
+                onTouchMove={handleElementDrag}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
