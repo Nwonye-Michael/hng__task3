@@ -1,0 +1,7 @@
+.App {
+  text-align: center;
+}
+
+::-webkit-scrollbar {
+  width: 0.1rem; /* Adjust this to change the scrollbar's width */
+}
