@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
-import { useDrag, useDrop, DndProvider } from "react-dnd"
-import { HTML5Backend } from "react-dnd-html5-backend"
+
 import NavBar from "../components/Navbar"
 
 const Gallery = () => {
@@ -215,16 +214,18 @@ const Gallery = () => {
   //  set boundary for dragging something tha inst an image
 
   const [firstIndex, setFirstIndex] = useState("")
+  // the animation when i drag
   const [imageBeingDraggedSrc, setImageBeingDaraggedSrc] = useState("")
-
+  const [isScrollEnabled, setScrollEnabled] = useState(true)
   const imgRef = useRef(null)
 
   const handleTouchStart = (e, index) => {
-    // e.preventDefault()
+    setScrollEnabled(false)
     setFirstIndex(index)
   }
 
   const handleTouchEnd = (e, index) => {
+    setScrollEnabled(true)
     const el = e.target
     //  console.log(e, el.id, index)
   }
@@ -232,9 +233,9 @@ const Gallery = () => {
   const handleTouchStartGallery = (e) => {
     if (e.nodeName === "IMG") {
       setFirstIndex(e.target.getAttribute("i"))
-      console.log(e.target.getAttribute("src"))
+      // console.log(e.target.getAttribute("src"))
       // setImageBeingDaraggedSrc(e.target.getAttribute("src"))
-      console.log(e)
+      // console.log(e)
     }
   }
 
@@ -243,7 +244,7 @@ const Gallery = () => {
       e.changedTouches[0].clientX,
       e.changedTouches[0].clientY
     )
-    console.log(elementAtPoint.tagName.toUpperCase())
+    // console.log(elementAtPoint.tagName.toUpperCase())
     if (elementAtPoint.tagName.toUpperCase() === "IMG") {
       const tempIndex = elementAtPoint.getAttribute("i")
 
@@ -257,7 +258,7 @@ const Gallery = () => {
 
       setImages(updatedImages)
     }
-    console.log("not dropped on image")
+    // console.log("not dropped on image")
   }
 
   const handleElementDrag = (e) => {
@@ -282,15 +283,34 @@ const Gallery = () => {
 
     // Swap the images at oldIndex and newIndex
     const temp = updatedImages[oldIndex]
-    console.log(temp, updatedImages[newIndex], "things to swap")
+    // console.log(temp, updatedImages[newIndex], "things to swap")
     updatedImages[oldIndex] = updatedImages[newIndex]
     // console.log(updatedImages[newIndex])
     updatedImages[newIndex] = temp
     // console.log(updatedImages[newIndex])
 
     setImages(updatedImages)
-    console.log(images)
+    // console.log(images)
   }
+
+  const handleWindowTouchMove = (e) => {
+    if (!isScrollEnabled) {
+      e.preventDefault()
+      // console.log(e)
+    }
+  }
+
+  // Add the touchmove event listener to the window
+  useEffect(() => {
+    window.addEventListener("touchmove", handleWindowTouchMove, {
+      passive: false,
+    })
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener("touchmove", handleWindowTouchMove)
+    }
+  }, [isScrollEnabled])
 
   // like a copy of the pic following you
   // how about actually making a copy of the pics and having it follow the point i  am dragging
@@ -302,6 +322,7 @@ const Gallery = () => {
         className="gallery__grid grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 md:gap-y-8 gap-y-4 lg:gap-y-12 relative top-12 max-w-100vw overflow-hidden"
         onTouchStart={(e) => handleTouchStartGallery(e)}
         onTouchEnd={(e) => handleTouchEndGallery(e)}
+    
       >
         {images.map((image, index) => (
           <div key={image.id}>
